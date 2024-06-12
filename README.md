@@ -125,3 +125,48 @@ Genes with down-regulation in Sig_Senes_MtD_vs_Prolif are relevant to the functi
 in both Senes_MtD_vs_Prolif and Senes_vs_Prolif is [for intracellular transport, which is important to cell division](https://doi.org/10.1073/pnas.111145398).
 ![Sene_DOWN_pathway](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/a70cda61-986d-42be-8971-bb5840c9eb58)
 *Over Representation Analysis (ORA) of genes with udown-regulation in comparsions Sig_Senes_vs_Prolif and Sig_Senes_MtD_vs_Prolif*
+
+Clustered heatmaps were made to investigate the expression pattern of significant differential genes in three sample groups. It is worth noticed that part of the genes in Sig_Senes_MtD_vs_Prolif show up-regulation in Senes in relative to Senes_MtD and Prolif. From the result of pathway analysis, it can be inferred that mitochondria depletion
+attenuates the function of replicative senescent cells for extracellular matrix organization.
+```
+# Function for gene Clustering and making heatmap 
+plot_heatmap = function(expression_table_sig,plot_title)
+{
+  em_sig = expression_table_sig[,1:9]
+  em_sig_scaled = data.frame(t(scale(t(em_sig))))
+  hm.matrix = as.matrix(em_sig_scaled)
+  
+  # set gradient colour
+  colours = c("#1948A4","#F0D888","#701820")
+  colorRampPalette(colours)(100)
+  
+  # clustering
+  y.dist = amap::Dist(hm.matrix, method="spearman")
+  
+  y.cluster = hclust(y.dist, method="average")
+  
+  y.dd = as.dendrogram(y.cluster)
+  
+  y.dd.reorder = reorder(y.dd,0,FUN="average")
+  
+  y.order = order.dendrogram(y.dd.reorder)
+  
+  hm.matrix_clustered = hm.matrix[y.order,]
+  
+  hm.matrix_clustered = as.matrix(hm.matrix_clustered)
+  hm.matrix_clustered = reshape2::melt(hm.matrix_clustered) 
+  
+  ggp = ggplot(hm.matrix_clustered, aes(x=Var2, y=Var1, fill=value)) + geom_tile() + 
+    scale_fill_gradientn(colours = colorRampPalette(colours)(100)) +
+    labs(title=plot_title, x="", y="") + 
+    
+    # remove redundant y text, also create some space for x text
+    theme(axis.text.y = element_blank(), axis.text.x = element_text(angle = 45,vjust = 0.6),axis.ticks=element_blank()) 
+  
+  
+  return(ggp)
+}
+```
+![Cluster_Heatmap](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/07dccb31-1d72-4282-94b5-37e1afb6e9b2)\
+*Expression profiles of differentially expressed RNA in Senes_MtD_vs_Prolif, Senes_MtD_vs_Senes and Senes_vs_Prolif*
+
