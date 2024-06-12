@@ -192,3 +192,10 @@ VennDiagram_Senes
 Replicative senescent cells show a down regulation of genes related to cell division, and up-regulation of genes related to extracellular matrix organization. Mitochondria depletion results in a down regulation of genes related to extracellular matrix organization in replicative senescent cells. Analysis of Senes_MtD indicates the up
 regulation of glycolysis related genes in the situation of mitochondria depletion.
 
+## Discussion
+In this report, the influence of mitochondria depletion was determined, which could result in the stimulation of glycolysis. 
+Mitochondria respiration and glycolysis both utilize glucose to generate ATP, with 36 ATP generated in mitochondria respiration and 2 ATP generated in
+glycolysis per glucose molecule. Mitochondria respiration is used for most cells when oxygen is sufficient.
+However, [proliferating cells like fibroblasts use aerobic glycolysis even when oxygen is abundant](https://doi.org/10.1016/j.molcel.2020.12.012). 
+The depletion of mitochondria may result in increasing of this phenomenon, which is said to [promote cell proliferation](https://doi.org/10.1038/ncb3124). 
+Further analysis is needed to investigate the impact of mitochondria depletion on replicative senescent state.
