@@ -170,3 +170,25 @@ plot_heatmap = function(expression_table_sig,plot_title)
 ![Cluster_Heatmap](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/07dccb31-1d72-4282-94b5-37e1afb6e9b2)\
 *Expression profiles of differentially expressed RNA in Senes_MtD_vs_Prolif, Senes_MtD_vs_Senes and Senes_vs_Prolif*
 
+Venn Diagrams were plotted to investigate the number of genes that overlap in different comparisons.
+308 genes overlap in upregulation part of Sig_Senes_MtD_vs_Prolif and Sig_Senes_MtD_vs_Senes, which means that mitochondria depletion makes IMR-90 cells up-regulate some genes to adapt to the change. This change seems to be in a replicative senescent independent manner.
+551 genes overlap in Sig_Senes_MtD_vs_Prolif and Sig_Senes_vs_Prolif. It can be inferred that some features of replicative senescent are in a mitochondria independent manner, and
+this is consistent with the result of pathway analysis.
+```
+# Venn Diagram 
+genelist_for_MtD_UP = list(Prolif = Sig_Senes_MtD_vs_Prolif_UP[,"SYMBOL"], Senes = Sig_Senes_MtD_vs_Senes_UP[,"SYMBOL"])
+VennDiagram_MtD = ggVennDiagram::ggVennDiagram (genelist_for_MtD_UP) + scale_fill_gradient(high = color_for_upregulate) 
+VennDiagram_MtD # THE NAMES ON THE DIAGRAM SHOW THE "DIFFERENT" COMPARSION BETWEEN THE GROUP
+
+genelist_for_Senes = list(Senes_MtD = Sig_Senes_MtD_vs_Prolif[,"SYMBOL"], Senes = Sig_Senes_vs_Prolif[,"SYMBOL"])
+VennDiagram_Senes = ggVennDiagram::ggVennDiagram(genelist_for_Senes) +
+  scale_fill_gradient(high = color_for_upregulate) 
+VennDiagram_Senes
+```
+![Venn Diagram](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/ebabfeb3-97e9-4af2-b73c-29fe3e4b245c)\
+*Analysis of differential expression signatures*
+
+## Conclusion
+Replicative senescent cells show a down regulation of genes related to cell division, and up-regulation of genes related to extracellular matrix organization. Mitochondria depletion results in a down regulation of genes related to extracellular matrix organization in replicative senescent cells. Analysis of Senes_MtD indicates the up
+regulation of glycolysis related genes in the situation of mitochondria depletion.
+
