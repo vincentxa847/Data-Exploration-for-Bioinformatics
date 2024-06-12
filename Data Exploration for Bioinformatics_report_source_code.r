@@ -1,9 +1,7 @@
 library(ggplot2)
 library(dplyr)
-
-library(clusterProfiler)
 library(org.Hs.eg.db) # Annotation for human, data was collected from IMR-90 cell line, so using database of human 
-library(ggVennDiagram)
+
 
 #### File handle ####
 File_Handle = function(file_path)
@@ -290,3 +288,82 @@ Heat_map_Sig_Senes_vs_Prolif
 Combined_Plot = ggpubr::ggarrange(Heat_map_Sig_Senes_MtD_vs_Prolif,Heat_map_Sig_Senes_MtD_vs_Senes,Heat_map_Sig_Senes_vs_Prolif,
                           ncol=3,labels = "AUTO")
 Combined_Plot
+
+#### Pathway analysis ####
+pathway_analysis = function(expression_table_sig,Title)
+{
+  sig_genes = expression_table_sig[,"SYMBOL"]
+  # Biological Id TRanslator to ENTREZID
+  sig_genes_entrez = clusterProfiler::bitr(sig_genes, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  pathway_results = clusterProfiler::enrichGO(gene = sig_genes_entrez$ENTREZID, OrgDb = org.Hs.eg.db, readable = T, 
+                             ont = "BP", pvalueCutoff = 0.05, qvalueCutoff = 0.10)
+  # using clusterProfiler in-built plotting tool
+  ggp = clusterProfiler::dotplot(pathway_results, showCategory= 10,title= Title)
+
+  return(ggp)
+}
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif = pathway_analysis(Sig_Senes_MtD_vs_Prolif,"Sig_Senes_MtD_vs_Prolif")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif_UP = pathway_analysis(Sig_Senes_MtD_vs_Prolif_UP,"Sig_Senes_MtD_vs_Prolif_UP")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif_UP
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif_DOWN = pathway_analysis(Sig_Senes_MtD_vs_Prolif_DOWN,"Sig_Senes_MtD_vs_Prolif_DOWN")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif_DOWN
+
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes = pathway_analysis(Sig_Senes_MtD_vs_Senes,"Sig_Senes_MtD_vs_Senes")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes_UP = pathway_analysis(Sig_Senes_MtD_vs_Senes_UP,"Sig_Senes_MtD_vs_Senes_UP")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes_UP
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes_DOWN = pathway_analysis(Sig_Senes_MtD_vs_Senes_DOWN,"Sig_Senes_MtD_vs_Senes_DOWN")
+Pathway_analysis_for_Sig_Senes_MtD_vs_Senes_DOWN
+
+
+Pathway_analysis_for_Sig_Senes_vs_Prolif = pathway_analysis(Sig_Senes_vs_Prolif,"Sig_Senes_vs_Prolif")
+Pathway_analysis_for_Sig_Senes_vs_Prolif
+Pathway_analysis_for_Sig_Senes_vs_Prolif_UP = pathway_analysis(Sig_Senes_vs_Prolif_UP,"Sig_Senes_vs_Prolif_UP")
+Pathway_analysis_for_Sig_Senes_vs_Prolif_UP
+Pathway_analysis_for_Sig_Senes_vs_Prolif_DOWN = pathway_analysis(Sig_Senes_vs_Prolif_DOWN,"Sig_Senes_vs_Prolif_DOWN")
+Pathway_analysis_for_Sig_Senes_vs_Prolif_DOWN
+
+Combined_Plot = ggpubr::ggarrange(Pathway_analysis_for_Sig_Senes_MtD_vs_Prolif,Pathway_analysis_for_Sig_Senes_MtD_vs_Senes,Pathway_analysis_for_Sig_Senes_vs_Prolif,
+                          ncol=3,labels = "AUTO")
+Combined_Plot
+
+#### Signature ####
+Add_mean_for_three_groups_to_find_signature = function(table)
+{
+  table$Prolif_mean = rowMeans(table[,1:3])
+  table$Senes_mean = rowMeans(table[,4:6])
+  table$Senes_MtD_mean = rowMeans(table[,7:9])
+  return (table)
+}
+
+metagene_boxplot = function(signature)
+{
+  signature_expression = data.frame(t(scale(t(signature[,1:9])))) # scale the expression
+  metagene = data.frame(colMeans(signature_expression)) 
+  names(metagene) = "value"
+  metagene$group = Sample_sheet$SAMPLE_GROUP
+  
+  ggp = ggplot(metagene, aes(x=group, y= value, colour= group)) + geom_boxplot() +
+    scale_colour_manual(values = c(color_for_Prolif,color_for_Senes,color_for_Senes_MtD))
+  
+  return(ggp)
+}
+
+Up_in_Senes_Down_in_Senes_MtD_and_Prolif = Add_mean_for_three_groups_to_find_signature(Sig_Senes_MtD_vs_Prolif)
+Up_in_Senes_Down_in_Senes_MtD_and_Prolif = subset(Up_in_Senes_Down_in_Senes_MtD_and_Prolif,Senes_mean > Senes_MtD_mean & Senes_mean > Prolif_mean)
+metagene_boxplot_Up_in_Senes_Down_in_Senes_MtD_and_Prolif = metagene_boxplot(Up_in_Senes_Down_in_Senes_MtD_and_Prolif)
+metagene_boxplot_Up_in_Senes_Down_in_Senes_MtD_and_Prolif
+Pathway_analysis_for_Up_in_Senes_Down_in_Senes_MtD_and_Prolif = pathway_analysis(Up_in_Senes_Down_in_Senes_MtD_and_Prolif,"Up_in_Senes_Down_in_Senes_MtD_and_Prolif") + ggtitle("") # remove the title (to avoid overlap when combining plot)
+Pathway_analysis_for_Up_in_Senes_Down_in_Senes_MtD_and_Prolif # extracellular matrix organization
+
+#### Venn Diagram ####
+genelist_for_MtD_UP = list(Prolif = Sig_Senes_MtD_vs_Prolif_UP[,"SYMBOL"], Senes = Sig_Senes_MtD_vs_Senes_UP[,"SYMBOL"])
+VennDiagram_MtD = ggVennDiagram::ggVennDiagram (genelist_for_MtD_UP) +
+  scale_fill_gradient(high = color_for_upregulate) 
+VennDiagram_MtD # THE NAMES ON THE DIAGRAM SHOW THE "DIFFERENT" COMPARSION BETWEEN THE GROUP
+
+genelist_for_Senes = list(Senes_MtD = Sig_Senes_MtD_vs_Prolif[,"SYMBOL"], Senes = Sig_Senes_vs_Prolif[,"SYMBOL"])
+VennDiagram_Senes = ggVennDiagram::ggVennDiagram(genelist_for_Senes) +
+  scale_fill_gradient(high = color_for_upregulate) 
+VennDiagram_Senes
