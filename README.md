@@ -1,5 +1,13 @@
 # Using bulk RNA-seq dataset to compare the transcriptomes of proliferating, replicative senescent, and mitochondria-depleted senescent fibroblasts
 
+### Dataset Used 
+Bulk RNA-seq dataset comparing proliferating cells (prolif) to replicative senescent cells (senes) and replicative senescent cells which have had their mitochondria depleted (senes_MtD).
+The cells are human IMR90 fibroblasts and three replicates for each group.
+- Expression Values Table: EM.csv
+- Sample Sheet: Lists the group to which each sample belongs, serving as a basis for grouping data in ggplot2 (Sample_sheet.csv)
+- Annotation Table: Links gene ID to gene name and their coordinates (Human_Background_GRCh38.p13.csv)
+- Differential Expression Files: Contains log2 fold change, p-values, and adjusted p-values, comparing senes_MtD to prolif (DE_Senes_MtD_vs_Prolif.csv), senes_MtD to senes (DE_Senes_MtD_vs_Senes.csv) and senes to prolif (DE_Senes_vs_Prolif.csv)
+
 ## Result
 Genes that show significant differential expression (p.adj < 0.001, absolute log2fold > 2) in three comparisons (Senes_MtD_vs_Prolif, Senes_MtD_vs_Senes and Senes_vs_Prolif) were selected separately
 (with prefix Sig-) for differential gene expression analysis. 
@@ -116,8 +124,22 @@ plot_volcano = function(de_table,de_table_sig_UP,de_table_sig_DOWN,plot_title,p_
 ![Volcano Plot](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/6636ee2f-0cde-4f80-89b9-8a7e9f218e40)
 *Volcano plot of differential expression genes in three comparsions*
 
-Pathway analysis was performed to investigate the function of significant differential genes. It can be seen that the genes with up-regulation in
-Sig_Senes_MtD_vs_Senes and Sig_Senes_MtD_vs_Prolif are relevant to oxygen levels.
+Pathway analysis was performed to investigate the function of significant differential genes.
+```
+pathway_analysis = function(expression_table_sig,Title)
+{
+  sig_genes = expression_table_sig[,"SYMBOL"]
+  # Biological Id TRanslator to ENTREZID
+  sig_genes_entrez = clusterProfiler::bitr(sig_genes, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  pathway_results = clusterProfiler::enrichGO(gene = sig_genes_entrez$ENTREZID, OrgDb = org.Hs.eg.db, readable = T, 
+                             ont = "BP", pvalueCutoff = 0.05, qvalueCutoff = 0.10)
+  # using clusterProfiler in-built plotting tool
+  ggp = clusterProfiler::dotplot(pathway_results, showCategory= 10,title= Title)
+
+  return(ggp)
+}
+```
+It can be seen that the genes with up-regulation in Sig_Senes_MtD_vs_Senes and Sig_Senes_MtD_vs_Prolif are relevant to oxygen levels.
 ![Sig_Senes_MtD_UP_Pathway](https://github.com/vincentxa847/Data-Exploration-for-Bioinformatics/assets/118545004/215e4265-d991-4dfa-a316-5f67c1591c65)
 *Over Representation Analysis (ORA) of genes with up-regulation in comparsions Sig_Senes_MtD_vs_Senes and Sig_Senes_MtD_vs_Prolif*
 
